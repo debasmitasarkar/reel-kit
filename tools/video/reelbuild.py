@@ -61,9 +61,13 @@ def render(frame_fn, n, out, audio=None):
         cmd += ["-i", str(audio), "-map", "0:v", "-map", "1:a", "-c:a", "aac", "-ar", "48000", "-shortest"]
     cmd += ["-c:v", "libx264", "-crf", "17", "-preset", "medium", "-pix_fmt", "yuv420p", str(out)]
     ff = subprocess.Popen(cmd, stdin=subprocess.PIPE)
-    for i in range(n):
-        ff.stdin.write(frame_fn(i / FPS).tobytes())
-    ff.stdin.close()
+    try:
+        for i in range(n):
+            ff.stdin.write(frame_fn(i / FPS).tobytes())
+        ff.stdin.close()
+    except BrokenPipeError:  # with audio, -shortest lets ffmpeg finish at the audio's end before the last frames
+        if not audio:
+            raise
     if ff.wait():
         sys.exit(f"render failed: {out}")
     return out
