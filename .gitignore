@@ -1,0 +1,6 @@
+media/raw/*
+media/out/*
+!media/raw/.gitkeep
+!media/out/.gitkeep
+__pycache__/
+.DS_Store
